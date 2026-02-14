@@ -114,7 +114,7 @@ python main.py
 | `REQUEST_TIMEOUT` | APIリクエストタイムアウト(秒) | `180` |
 | `LOG_LEVEL` | ログレベル | `INFO` |
 | `USE_STREAMING` | ストリーミングレスポンス有効化 | `true` |
-| `STREAMING_UPDATE_INTERVAL` | ストリーミング更新間隔（チャンク数） | `50` |
+| `STREAMING_UPDATE_INTERVAL` | ストリーミング更新間隔（チャンク数） | `30` |
 
 ## 🏗️ プロジェクト構成
 
