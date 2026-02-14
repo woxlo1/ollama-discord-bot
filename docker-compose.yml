@@ -2,24 +2,38 @@ version: "3.9"
 
 services:
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama:latest
     container_name: ollama
     ports:
       - "11434:11434"
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   bot:
     build: .
     container_name: discord_bot
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3}
       - OLLAMA_HOST=http://ollama:11434
+      - BOT_PREFIX=${BOT_PREFIX:-!}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   ollama_data:
+    driver: local
