@@ -17,3 +17,6 @@ htmlcov/
 .vscode/
 *.log
 .DS_Store
+
+# Bot memory
+bot_memory.json
