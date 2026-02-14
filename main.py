@@ -1,4 +1,5 @@
 """Main entry point for Ollama Discord Bot."""
+
 import logging
 
 import discord
@@ -25,15 +26,15 @@ def main():
     try:
         # Initialize bot
         bot = OllamaBot()
-        
+
         # Setup commands and events
         setup_slash_commands(bot)
         setup_events(bot)
-        
+
         # Run bot
         logger.info("🚀 Starting Ollama Discord Bot...")
         bot.run(Config.DISCORD_TOKEN)
-        
+
     except discord.LoginFailure:
         logger.error("❌ Invalid Discord token. Please check your .env file.")
     except Exception as e:
