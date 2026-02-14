@@ -1,7 +1,7 @@
 """Slash commands for the bot."""
 
-import logging
 import asyncio
+import logging
 
 import discord
 from discord import app_commands

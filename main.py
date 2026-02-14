@@ -5,9 +5,9 @@ import logging
 import discord
 from dotenv import load_dotenv
 
-from config import Config
 from bot import OllamaBot
-from commands import setup_slash_commands, setup_events
+from commands import setup_events, setup_slash_commands
+from config import Config
 from utils import setup_logger
 
 # Load environment variables

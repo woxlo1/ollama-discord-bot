@@ -1,7 +1,7 @@
 """Event handlers for the bot."""
 
-import logging
 import asyncio
+import logging
 
 import discord
 from discord.ext import commands

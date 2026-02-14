@@ -1,6 +1,7 @@
 """Ollama API client."""
 
 import logging
+
 import requests
 
 from config import Config

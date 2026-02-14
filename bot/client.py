@@ -5,8 +5,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from config import Config
 from bot.ollama_client import OllamaClient
+from config import Config
 
 logger = logging.getLogger(__name__)
 
