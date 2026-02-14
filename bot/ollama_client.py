@@ -78,3 +78,47 @@ class OllamaClient:
         except Exception as e:
             logger.error(f"Health check failed: {e}")
             return False
+
+    def generate_stream(self, prompt: str):
+        """
+        Generate response from Ollama with streaming.
+
+        Args:
+            prompt: User input prompt
+
+        Yields:
+            Response chunks as they arrive
+        """
+        import json
+
+        full_prompt = Config.get_full_prompt(prompt)
+
+        try:
+            response = requests.post(
+                self.url,
+                json={"model": self.model, "prompt": full_prompt, "stream": True},
+                timeout=self.timeout,
+                stream=True,
+            )
+            response.raise_for_status()
+
+            for line in response.iter_lines():
+                if line:
+                    try:
+                        data = json.loads(line)
+                        if "response" in data:
+                            yield data["response"]
+                    except json.JSONDecodeError:
+                        continue
+
+        except requests.exceptions.Timeout:
+            logger.error("Ollama streaming request timed out.")
+            yield "⏳ モデルの応答がタイムアウトしました。"
+
+        except requests.exceptions.ConnectionError:
+            logger.error(f"Could not connect to Ollama at {self.host}")
+            yield f"⚠️ Ollamaサーバーに接続できません ({self.host})"
+
+        except Exception as e:
+            logger.exception(f"Unexpected error in generate_stream: {e}")
+            yield "❌ 予期しないエラーが発生しました。"

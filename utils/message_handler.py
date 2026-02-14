@@ -1,5 +1,6 @@
 """Message handling utilities."""
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -46,3 +47,58 @@ async def send_long_message(
                 await message.reply(chunk, mention_author=mention_user)
             except Exception as e:
                 logger.error(f"Failed to send reply: {e}")
+
+
+async def send_streaming_message(
+    message: discord.Message,
+    stream_generator,
+    mention_user: bool = True,
+) -> None:
+    """
+    Send streaming response with live updates.
+
+    Args:
+        message: Discord message to reply to
+        stream_generator: Generator yielding response chunks
+        mention_user: Whether to mention the user
+    """
+    buffer = ""
+    sent_message = None
+    update_counter = 0
+
+    try:
+        for chunk in stream_generator:
+            buffer += chunk
+            update_counter += 1
+
+            # Update message every N chunks to avoid rate limits
+            if update_counter >= Config.STREAMING_UPDATE_INTERVAL:
+                if sent_message is None:
+                    # First message
+                    content = f"{message.author.mention} {buffer}" if mention_user else buffer
+                    sent_message = await message.reply(content[: Config.MAX_RESPONSE_LENGTH])
+                else:
+                    # Update existing message
+                    try:
+                        await sent_message.edit(content=buffer[: Config.MAX_RESPONSE_LENGTH])
+                    except discord.errors.HTTPException:
+                        # If edit fails, send as new message
+                        pass
+
+                update_counter = 0
+
+        # Final update with complete response
+        if buffer:
+            if sent_message is None:
+                content = f"{message.author.mention} {buffer}" if mention_user else buffer
+                await message.reply(content[: Config.MAX_RESPONSE_LENGTH])
+            else:
+                try:
+                    await sent_message.edit(content=buffer[: Config.MAX_RESPONSE_LENGTH])
+                except Exception:
+                    pass
+
+    except Exception as e:
+        logger.error(f"Error in streaming message: {e}")
+        if sent_message:
+            await sent_message.edit(content=f"{buffer}\n\n❌ エラーが発生しました")

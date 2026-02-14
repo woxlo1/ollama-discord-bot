@@ -17,6 +17,8 @@ class Config:
     # Bot Behavior
     MAX_RESPONSE_LENGTH: int = int(os.getenv("MAX_RESPONSE_LENGTH", "1900"))
     REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "180"))
+    USE_STREAMING: bool = os.getenv("USE_STREAMING", "true").lower() == "true"
+    STREAMING_UPDATE_INTERVAL: int = int(os.getenv("STREAMING_UPDATE_INTERVAL", "50"))
 
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
