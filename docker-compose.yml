@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  bot:
+    build: .
+    container_name: discord_bot
+    depends_on:
+      - ollama
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_HOST=http://ollama:11434
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
