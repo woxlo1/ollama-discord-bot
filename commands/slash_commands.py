@@ -74,8 +74,6 @@ def setup_slash_commands(bot):
             color=discord.Color.green(),
         )
 
-        embed.add_field(name="📝 メンション", value="@BotName こんにちは！", inline=False)
-
         embed.add_field(
             name="⚡ コマンド",
             value=(
