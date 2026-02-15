@@ -35,7 +35,7 @@ def setup_events(bot):
             user_input = message.content.replace(f"<@{bot.user.id}>", "").strip()
 
             if not user_input:
-                await message.reply("💬 何か話しかけてね！", mention_author=False)
+                await message.reply("💬 何か話しかけてね！", mention_author=True)
                 return
 
             logger.info(f"📨 Mention | User: {message.author} | Input: {user_input[:50]}...")
@@ -60,11 +60,11 @@ def setup_events(bot):
                         bot.memory.learn_fact(learned, source=f"user_{user_id}")
                         logger.info(f"🧠 Learned: {learned[:50]}...")
 
-                    # mention_author=False to avoid mention loops
-                    await send_long_message(message=message, content=reply, mention_user=False)
+                    # mention_author=True to avoid mention loops
+                    await send_long_message(message=message, content=reply, mention_user=True)
                 except Exception as e:
                     logger.error(f"Error in mention handler: {e}")
-                    await message.reply("❌ エラーが発生しました。", mention_author=False)
+                    await message.reply("❌ エラーが発生しました。", mention_author=True)
 
     @bot.event
     async def on_command_error(ctx: commands.Context, error: commands.CommandError):
