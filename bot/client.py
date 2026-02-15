@@ -11,6 +11,7 @@ from bot.model_manager import ModelManager
 from bot.ollama_client import OllamaClient
 from bot.stats_tracker import StatsTracker
 from bot.vision import VisionClient
+from bot.voice_manager import VoiceManager
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,7 @@ class OllamaBot(commands.Bot):
         """Initialize the bot."""
         intents = discord.Intents.default()
         intents.message_content = True
+        intents.voice_states = True  # Required for voice
 
         super().__init__(command_prefix=Config.BOT_PREFIX, intents=intents)
 
@@ -45,6 +47,9 @@ class OllamaBot(commands.Bot):
 
         self.vision = VisionClient(host=Config.OLLAMA_HOST, timeout=Config.REQUEST_TIMEOUT)
         logger.info("👁️ Vision client initialized")
+
+        self.voice_manager = VoiceManager()
+        logger.info("🎤 Voice manager initialized")
 
         # Per-user template selection
         self.user_templates = {}
@@ -72,3 +77,8 @@ class OllamaBot(commands.Bot):
             logger.info("👁️ LLaVA model is available")
         else:
             logger.warning("⚠️ LLaVA model not found. Run: ollama pull llava")
+
+        if self.voice_manager.voicevox.is_available():
+            logger.info("🎤 VOICEVOX is available")
+        else:
+            logger.warning("⚠️ VOICEVOX not found. Voice features will be unavailable.")
