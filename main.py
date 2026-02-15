@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from bot import OllamaBot
 from commands import setup_events, setup_slash_commands
+from commands.advanced_commands import setup_advanced_commands
 from config import Config
 from utils import setup_logger
 
@@ -27,12 +28,13 @@ def main():
         # Initialize bot
         bot = OllamaBot()
 
-        # Setup commands and events
+        # Setup all commands and events
         setup_slash_commands(bot)
+        setup_advanced_commands(bot)
         setup_events(bot)
 
         # Run bot
-        logger.info("🚀 Starting Ollama Discord Bot...")
+        logger.info("🚀 Starting Ollama Discord Bot with advanced features...")
         bot.run(Config.DISCORD_TOKEN)
 
     except discord.LoginFailure:

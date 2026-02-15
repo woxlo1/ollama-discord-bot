@@ -125,7 +125,13 @@ def setup_slash_commands(bot):
         )
 
         embed.add_field(
-            name="⚡ 基本コマンド",
+            name="💬 メンション（カジュアル）",
+            value="`@BotName こんにちは！`\nメンションして気軽に話しかけてください",
+            inline=False,
+        )
+
+        embed.add_field(
+            name="⚡ スラッシュコマンド（推奨）",
             value=(
                 "`/ask <質問>` - AIに質問（会話履歴を考慮）\n"
                 "`/model` - モデル情報表示\n"
