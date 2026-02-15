@@ -14,6 +14,13 @@ class Config:
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3")
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 
+    # VOICEVOX
+    VOICEVOX_HOST: str = os.getenv("VOICEVOX_HOST", "http://localhost:50021")
+    VOICEVOX_PATH: str = os.getenv("VOICEVOX_PATH", "")  # Optional: for auto-start
+
+    # FFmpeg
+    FFMPEG_PATH: str = os.getenv("FFMPEG_PATH", "")  # Empty = auto-detect from PATH
+
     # Bot Behavior
     MAX_RESPONSE_LENGTH: int = int(os.getenv("MAX_RESPONSE_LENGTH", "1900"))
     REQUEST_TIMEOUT: int = int(os.getenv("REQUEST_TIMEOUT", "180"))

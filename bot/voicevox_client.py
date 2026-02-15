@@ -5,6 +5,8 @@ from typing import Optional
 
 import requests
 
+from config import Config
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,15 +23,15 @@ class VOICEVOXClient:
         "tsumugi_normal": 8,  # 春日部つむぎ（ノーマル）
     }
 
-    def __init__(self, host: str = "http://localhost:50021", timeout: int = 30):
+    def __init__(self, host: str = None, timeout: int = 30):
         """
         Initialize VOICEVOX client.
 
         Args:
-            host: VOICEVOX API host
+            host: VOICEVOX API host (uses Config.VOICEVOX_HOST if None)
             timeout: Request timeout
         """
-        self.host = host
+        self.host = host or Config.VOICEVOX_HOST
         self.timeout = timeout
 
     def is_available(self) -> bool:

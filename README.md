@@ -9,9 +9,14 @@
 ## ✨ 特徴
 
 - 🚀 ローカルで動作するLLMを使用（データはサーバーに送信されません）
-- ⚡ スラッシュコマンド & ボットにメンションで簡単に質問
+- 💬 **メンション & スラッシュコマンド両対応**
 - 🧠 **会話から学習し進化する**（会話履歴・学習機能）
-- 💾 ユーザーごとの会話コンテキスト保持
+- 📝 **8種類のプロンプトテンプレート**（コーディング、翻訳、創作など）
+- 🖼️ **画像認識機能**（LLaVAモデル対応）
+- 🎤 **音声読み上げ機能**（VOICEVOX + ずんだもん）
+- 📊 **使用統計トラッキング**
+- 💾 **会話・学習内容のエクスポート**
+- 🔄 **モデル管理機能**
 - 🐳 Docker & Docker Composeで簡単セットアップ
 - 📝 長文レスポンスの自動分割
 - ⚙️ 環境変数による柔軟な設定
@@ -22,6 +27,8 @@
 - Python 3.11以上
 - [Ollama](https://ollama.ai/) （ローカル実行の場合）
 - Discord Bot Token
+- （オプション）[VOICEVOX](https://voicevox.hiroshiba.jp/) - 音声読み上げ用
+- （オプション）FFmpeg - 音声機能用
 
 ## 🚀 クイックスタート
 
@@ -40,16 +47,26 @@ curl -fsSL https://ollama.ai/install.sh | sh
 ```bash
 ollama pull llama3
 # または他のモデル: mistral, codellama, など
+
+# オプション: 画像認識用
+ollama pull llava
 ```
 
 ### 3. Discord Botの作成
 
 1. [Discord Developer Portal](https://discord.com/developers/applications) にアクセス
 2. 新しいアプリケーションを作成
-3. Bot タブからトークンを取得
-4. OAuth2 → URL Generator で以下を選択:
-   - Scopes: `bot`, `applications.commands`
-   - Bot Permissions: `Send Messages`, `Use Slash Commands`, `Read Message History`
+3. **Bot タブ**:
+   - トークンを取得
+   - **Privileged Gateway Intents** で `MESSAGE CONTENT INTENT` を有効化
+4. **OAuth2 → URL Generator** で以下を選択:
+   - **Scopes**: `bot`, `applications.commands`
+   - **Bot Permissions**: 
+     - `Send Messages`
+     - `Use Slash Commands`
+     - `Read Message History`
+     - `Connect` (音声機能用)
+     - `Speak` (音声機能用)
 
 ### 4. 環境設定
 
@@ -87,24 +104,59 @@ python main.py
 
 ## 💡 使い方
 
-### メンション（カジュアル）
+### 💬 メンション（カジュアル）
 
 ```
 @BotName こんにちは！
 @BotName Pythonについて教えて
 ```
 
-### スラッシュコマンド（推奨）
+### ⚡ スラッシュコマンド
 
+#### 基本コマンド
 ```bash
-# 基本
-/ask question: Pythonの基本について教えて  # AIに質問（会話履歴を考慮）
-/model  # 現在のモデル情報を表示
-/help   # ヘルプを表示
+/ask question: Pythonの基本について教えて  # AIに質問
+/model  # モデル情報
+/help   # ヘルプ
+```
 
-# 学習機能
-/memory  # Botが学んだことを表示
+#### 学習機能
+```bash
+/memory  # 学習内容を表示
 /reset   # 会話履歴をリセット
+```
+
+#### プロンプトテンプレート
+```bash
+/templates  # テンプレート一覧
+/use_template coding Pythonのソート実装  # テンプレート使用
+```
+
+#### 画像認識
+```bash
+/analyze_image  # 画像を添付して分析
+```
+
+#### 統計・エクスポート
+```bash
+/stats  # 使用統計
+/export_chat  # 会話をMarkdownで保存
+/export_memory  # 学習内容をJSON保存
+```
+
+#### モデル管理
+```bash
+/list_models  # 利用可能なモデル一覧
+```
+
+#### 🎤 音声機能（要VOICEVOX）
+```bash
+/vc_join  # VCに参加
+/vc_ask question: Pythonについて  # 質問→音声読み上げ
+/vc_character  # ずんだもん等のキャラ変更
+/speak text: こんにちは  # テキスト読み上げ
+/vc_status  # 接続状態確認
+/vc_leave  # VC退出
 ```
 
 ### 🧠 学習機能について
@@ -113,12 +165,12 @@ python main.py
 - **文脈理解**: 「それ」「その話」などの代名詞も理解可能
 - **共有学習**: 全ユーザーの会話から学習（最大100件）
 - **自動保存**: 学習内容は`bot_memory.json`に保存
-- **メンション/コマンド共通**: どちらでも会話履歴を利用
 
 ## ⚙️ 設定
 
 `.env` ファイルで以下の設定が可能です：
 
+### 基本設定
 | 変数名 | 説明 | デフォルト |
 |--------|------|-----------|
 | `DISCORD_TOKEN` | Discord Botトークン | 必須 |
@@ -129,44 +181,113 @@ python main.py
 | `REQUEST_TIMEOUT` | APIリクエストタイムアウト(秒) | `180` |
 | `LOG_LEVEL` | ログレベル | `INFO` |
 
+### 音声機能設定
+| 変数名 | 説明 | デフォルト |
+|--------|------|-----------|
+| `VOICEVOX_HOST` | VOICEVOXのURL | `http://localhost:50021` |
+| `VOICEVOX_PATH` | VOICEVOX実行ファイルパス (オプション) | 空 |
+| `FFMPEG_PATH` | FFmpeg実行ファイルパス (空で自動検出) | 空 |
+
+### 設定例
+
+**Windows:**
+```bash
+DISCORD_TOKEN=your_token_here
+VOICEVOX_HOST=http://localhost:50021
+FFMPEG_PATH=C:\ffmpeg\bin\ffmpeg.exe
+```
+
+**macOS/Linux:**
+```bash
+DISCORD_TOKEN=your_token_here
+VOICEVOX_HOST=http://localhost:50021
+# FFMPEG_PATH は不要（自動検出）
+```
+
+## 🎤 音声機能のセットアップ
+
+詳細は [VOICEVOX_SETUP.md](VOICEVOX_SETUP.md) を参照してください。
+
+### クイックセットアップ
+
+1. **VOICEVOXをダウンロード**: https://voicevox.hiroshiba.jp/
+2. **FFmpegをインストール**:
+   ```bash
+   # Windows
+   choco install ffmpeg
+   
+   # macOS
+   brew install ffmpeg
+   
+   # Linux
+   sudo apt install ffmpeg
+   ```
+3. **VOICEVOXを起動** (http://localhost:50021)
+4. **Botを起動**して `/vc_join` で参加
+
 ## 🏗️ プロジェクト構成
 
 ```
 ollama-discord-bot/
 ├── bot/                    # Botコア
-│   ├── __init__.py
-│   ├── client.py          # Discord Bot クライアント
-│   └── ollama_client.py   # Ollama API クライアント
+│   ├── client.py          # メインクライアント
+│   ├── ollama_client.py   # Ollama API
+│   ├── memory.py          # 学習・記憶システム
+│   ├── templates.py       # プロンプトテンプレート
+│   ├── vision.py          # 画像認識
+│   ├── voice_manager.py   # VC管理
+│   ├── voicevox_client.py # VOICEVOX連携
+│   ├── model_manager.py   # モデル管理
+│   ├── stats_tracker.py   # 統計
+│   └── export_manager.py  # エクスポート
 ├── commands/              # コマンド
-│   ├── __init__.py
-│   ├── slash_commands.py  # スラッシュコマンド
-│   └── events.py          # イベントハンドラー
+│   ├── slash_commands.py  # 基本コマンド
+│   ├── advanced_commands.py # 高度な機能
+│   ├── voice_commands.py  # VC関連
+│   └── events.py          # イベント
 ├── config/                # 設定
-│   ├── __init__.py
-│   └── settings.py        # 設定管理
+│   └── settings.py        # 環境変数管理
 ├── utils/                 # ユーティリティ
-│   ├── __init__.py
-│   ├── message_handler.py # メッセージ処理
-│   └── logger.py          # ロギング設定
-├── tests/                 # テスト
-├── .github/
-│   └── workflows/
-│       └── ci.yml         # CI/CD設定
+│   ├── message_handler.py
+│   └── logger.py
 ├── main.py                # エントリーポイント
-├── requirements.txt       # 依存関係
-├── requirements-dev.txt   # 開発用依存関係
+├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
-├── .env.example
-└── README.md
+└── .env.example
 ```
+
+## 📝 全コマンド一覧（19個）
+
+### 基本 (5)
+- `/ask` - AI質問
+- `/reset` - 会話リセット
+- `/memory` - 学習内容表示
+- `/model` - モデル情報
+- `/help` - ヘルプ
+
+### 高度な機能 (8)
+- `/templates` - テンプレート一覧
+- `/use_template` - テンプレート使用
+- `/analyze_image` - 画像分析
+- `/stats` - 統計情報
+- `/export_chat` - 会話エクスポート
+- `/export_memory` - 記憶エクスポート
+- `/list_models` - モデル一覧
+
+### 音声機能 (6)
+- `/vc_join` - VC参加
+- `/vc_leave` - VC退出
+- `/vc_ask` - 音声で回答
+- `/speak` - テキスト読み上げ
+- `/vc_character` - キャラ変更
+- `/vc_status` - 状態確認
 
 ## 🛠️ 開発
 
 ### 開発環境のセットアップ
 
 ```bash
-# 開発用依存関係のインストール
 pip install -r requirements-dev.txt
 
 # コードフォーマット
@@ -188,18 +309,33 @@ pytest
 ### Ollamaに接続できない
 
 ```bash
-# Ollamaが起動しているか確認
 curl http://localhost:11434/api/tags
-
-# モデルがダウンロードされているか確認
 ollama list
 ```
 
 ### Botがオンラインにならない
 
-- Discord Tokenが正しいか確認
-- Botに必要な権限が付与されているか確認
+- Discord Tokenを確認
+- Privileged Gateway Intentsを有効化
+- Bot権限を確認（Connect, Speak含む）
 - ログを確認: `docker-compose logs bot`
+
+### VC接続エラー (4006)
+
+[VC_TROUBLESHOOTING.md](VC_TROUBLESHOOTING.md) を参照:
+1. Discord Developer PortalでIntentを有効化
+2. Bot権限に「Connect」「Speak」を追加
+3. 新しいURLでBotを再招待
+
+### FFmpegが見つからない
+
+```bash
+# インストール確認
+ffmpeg -version
+
+# Windowsの場合は.envでパス指定
+FFMPEG_PATH=C:\ffmpeg\bin\ffmpeg.exe
+```
 
 ## 📝 ライセンス
 
@@ -214,3 +350,17 @@ MIT License
 - [Ollama](https://ollama.ai/)
 - [Discord.py Documentation](https://discordpy.readthedocs.io/)
 - [Discord Developer Portal](https://discord.com/developers/applications)
+- [VOICEVOX](https://voicevox.hiroshiba.jp/)
+- [FFmpeg](https://ffmpeg.org/)
+
+## 🎉 機能一覧
+
+✅ 会話履歴・学習機能  
+✅ プロンプトテンプレート (8種類)  
+✅ 画像認識 (LLaVA)  
+✅ 音声読み上げ (VOICEVOX + ずんだもん)  
+✅ 統計トラッキング  
+✅ データエクスポート  
+✅ モデル管理  
+✅ Docker対応  
+✅ 環境変数で柔軟な設定

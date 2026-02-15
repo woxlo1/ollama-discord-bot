@@ -57,7 +57,30 @@ sudo apt-get install ffmpeg
 # デフォルトで http://localhost:50021 で動作します
 ```
 
-### 4. Botの起動
+### 4. 環境変数の設定
+
+```bash
+# .envファイルを作成
+cp .env.example .env
+```
+
+**Windows の場合** - FFmpegのパスを指定:
+```bash
+# .env
+DISCORD_TOKEN=your_token_here
+VOICEVOX_HOST=http://localhost:50021
+FFMPEG_PATH=C:\Users\YourName\Downloads\ffmpeg\bin\ffmpeg.exe
+```
+
+**macOS/Linux の場合** - 自動検出:
+```bash
+# .env
+DISCORD_TOKEN=your_token_here
+VOICEVOX_HOST=http://localhost:50021
+# FFMPEG_PATH は不要（PATHから自動検出）
+```
+
+### 5. Botの起動
 
 ```bash
 # Pythonの場合
@@ -135,6 +158,25 @@ ffmpeg -version
 # ない場合は上記の手順でインストール
 ```
 
+**Windows環境の場合:**
+
+1. **絶対パスを指定** (.env):
+   ```bash
+   FFMPEG_PATH=C:\ffmpeg\bin\ffmpeg.exe
+   ```
+
+2. **パスを確認**:
+   ```bash
+   # Windowsでパスを確認
+   where ffmpeg
+   # 出力例: C:\ffmpeg\bin\ffmpeg.exe
+   ```
+
+3. **環境変数PATHに追加** (推奨):
+   - システムのプロパティ → 環境変数
+   - Path変数に `C:\ffmpeg\bin` を追加
+   - 再起動後、`.env`の`FFMPEG_PATH`は不要に
+
 ### Botがエラーを出す
 
 ```bash
@@ -156,12 +198,23 @@ python main.py
 
 Dockerを使用する場合、VOICEVOXは**ホストマシン**で起動する必要があります。
 
+### 環境変数設定
+
+```bash
+# .env ファイル
+VOICEVOX_HOST=http://host.docker.internal:50021  # macOS/Windows
+# または
+VOICEVOX_HOST=http://172.17.0.1:50021  # Linux
+```
+
+### docker-compose.yml での設定
+
 ```yaml
-# docker-compose.yml
-environment:
-  - VOICEVOX_HOST=http://host.docker.internal:50021  # macOS/Windows
-  # または
-  - VOICEVOX_HOST=http://172.17.0.1:50021  # Linux
+services:
+  bot:
+    environment:
+      - VOICEVOX_HOST=${VOICEVOX_HOST:-http://host.docker.internal:50021}
+      # FFmpegはコンテナ内で自動検出されるため設定不要
 ```
 
 ## 音声の調整

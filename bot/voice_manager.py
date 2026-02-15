@@ -4,12 +4,14 @@ import asyncio
 import io
 import logging
 import os
+import shutil
 import tempfile
 from typing import Dict, Optional
 
 import discord
 
 from bot.voicevox_client import VOICEVOXClient
+from config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +25,27 @@ class VoiceManager:
         self.voice_queues: Dict[int, asyncio.Queue] = {}  # guild_id -> Queue
         self.current_character: Dict[int, str] = {}  # guild_id -> character
         self.temp_dir = tempfile.gettempdir()
+        self.ffmpeg_path = self._get_ffmpeg_path()
+
+    def _get_ffmpeg_path(self) -> str:
+        """Get FFmpeg path from config or auto-detect."""
+        # Use configured path if provided
+        if Config.FFMPEG_PATH:
+            if os.path.exists(Config.FFMPEG_PATH):
+                logger.info(f"Using FFmpeg from config: {Config.FFMPEG_PATH}")
+                return Config.FFMPEG_PATH
+            else:
+                logger.warning(f"Configured FFmpeg path not found: {Config.FFMPEG_PATH}")
+
+        # Try to find ffmpeg in PATH
+        ffmpeg_path = shutil.which("ffmpeg")
+        if ffmpeg_path:
+            logger.info(f"Found FFmpeg in PATH: {ffmpeg_path}")
+            return ffmpeg_path
+
+        # Default fallback
+        logger.warning("FFmpeg not found. Voice features may not work.")
+        return "ffmpeg"
 
     async def join_voice_channel(
         self, channel: discord.VoiceChannel, guild_id: int
@@ -112,10 +135,10 @@ class VoiceManager:
                 with open(temp_file, "wb") as f:
                     f.write(audio_data)
 
-                # Play audio
+                # Play audio with configured FFmpeg path
                 voice_client = self.voice_clients[guild_id]
                 if not voice_client.is_playing():
-                    audio_source = discord.FFmpegPCMAudio(temp_file)
+                    audio_source = discord.FFmpegPCMAudio(temp_file, executable=self.ffmpeg_path)
                     voice_client.play(audio_source)
 
                     # Wait for playback to finish
