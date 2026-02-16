@@ -1,7 +1,10 @@
+version: '3.8'
+
 services:
+  # Ollama LLM
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama
+    container_name: minecraft-ollama
     ports:
       - "11434:11434"
     volumes:
@@ -13,7 +16,37 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - default
 
+  # API Bridge Server
+  api-bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minecraft-api-bridge
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./bot:/app/bot
+      - ./config:/app/config
+      - ./utils:/app/utils
+    command: python api_server.py
+    networks:
+      - default
+
+  # Discord Bot
   bot:
     build: .
     container_name: discord_bot
@@ -32,7 +65,13 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - default
 
 volumes:
   ollama_data:
     driver: local
+
+networks:
+  default:
+    name: minecraft-ollama-network

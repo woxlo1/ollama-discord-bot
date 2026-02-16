@@ -17,31 +17,36 @@ def setup_voice_commands(bot):
     @bot.tree.command(name="vc_join", description="VCに参加")
     async def vc_join_command(interaction: discord.Interaction):
         """Join user's voice channel."""
-        # Check if user is in a voice channel
         if not interaction.user.voice or not interaction.user.voice.channel:
-            await interaction.response.send_message(
-                "❌ ボイスチャンネルに参加してからコマンドを実行してください。", ephemeral=True
-            )
+            embed = discord.Embed(description="❌ VCに入ってから使ってください。", color=0xFF5555)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
             return
+
+        await interaction.response.defer()
 
         channel = interaction.user.voice.channel
         guild_id = interaction.guild.id
 
-        # Join channel
-        voice_client = await bot.voice_manager.join_voice_channel(channel, guild_id)
+        try:
+            vc = interaction.guild.voice_client
+            if vc and vc.is_connected():
+                embed = discord.Embed(description="⚠ すでにVCに接続しています。", color=0xFFFF55)
+                await interaction.followup.send(embed=embed, ephemeral=True)
+                return
 
-        if voice_client:
-            await interaction.response.send_message(
-                f"🎤 {channel.name} に参加しました！\n"
-                f"💬 `/ask` コマンドで質問すると、ずんだもんが読み上げます。",
-                ephemeral=False,
-            )
-            # Greeting
+            voice_client = await channel.connect()
             await bot.voice_manager.speak(guild_id, "よろしくなのだ！")
-        else:
-            await interaction.response.send_message(
-                "❌ ボイスチャンネルへの参加に失敗しました。", ephemeral=True
+
+            embed = discord.Embed(
+                description=f"✅ **{channel.name}** に接続しました！\n💬 `/ask` コマンドで質問すると、ずんだもんが読み上げます。",
+                color=0x55FF55
             )
+            await interaction.followup.send(embed=embed)
+
+        except Exception as e:
+            logger.error(f"VC接続エラー: {e}")
+            embed = discord.Embed(description="❌ ボイスチャンネルへの接続に失敗しました。", color=0xFF5555)
+            await interaction.followup.send(embed=embed, ephemeral=True)
 
     @bot.tree.command(name="vc_leave", description="VCから退出")
     async def vc_leave_command(interaction: discord.Interaction):

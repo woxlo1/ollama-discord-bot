@@ -1,3 +1,25 @@
+# API Server Requirements
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# WebSocket support
+websockets>=12.0
+
+# HTTP client (for Discord bot integration)
+requests>=2.31.0
+aiohttp>=3.9.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# JSON handling
+pydantic>=2.5.0
+
+# Logging
+python-json-logger>=2.0.7
+
 # Development dependencies
 
 # Code quality
