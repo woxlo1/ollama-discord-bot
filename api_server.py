@@ -115,9 +115,7 @@ async def chat(request: ChatRequest):
         # Add context if memory enabled
         if request.use_memory and request.player in state.player_contexts:
             context = state.player_contexts[request.player][-3:]  # Last 3 messages
-            context_str = "\n".join(
-                [f"{msg['role']}: {msg['content']}" for msg in context]
-            )
+            context_str = "\n".join([f"{msg['role']}: {msg['content']}" for msg in context])
             prompt = f"過去の会話:\n{context_str}\n\n新しい質問: {request.message}"
         else:
             prompt = request.message
@@ -133,15 +131,11 @@ async def chat(request: ChatRequest):
             state.player_contexts[request.player].append(
                 {"role": "user", "content": request.message}
             )
-            state.player_contexts[request.player].append(
-                {"role": "assistant", "content": response}
-            )
+            state.player_contexts[request.player].append({"role": "assistant", "content": response})
 
             # Keep only last 10 messages
             if len(state.player_contexts[request.player]) > 10:
-                state.player_contexts[request.player] = state.player_contexts[request.player][
-                    -10:
-                ]
+                state.player_contexts[request.player] = state.player_contexts[request.player][-10:]
 
         return ChatResponse(player=request.player, response=response, success=True)
 
@@ -159,9 +153,7 @@ async def broadcast_to_discord(request: BroadcastRequest):
     logger.info(f"Broadcasting to Discord: {request.message}")
 
     # Send to all WebSocket clients
-    await state.broadcast_to_minecraft(
-        {"type": "server_broadcast", "message": request.message}
-    )
+    await state.broadcast_to_minecraft({"type": "server_broadcast", "message": request.message})
 
     return {"success": True}
 

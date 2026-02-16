@@ -39,13 +39,15 @@ def setup_voice_commands(bot):
 
             embed = discord.Embed(
                 description=f"✅ **{channel.name}** に接続しました！\n💬 `/ask` コマンドで質問すると、ずんだもんが読み上げます。",
-                color=0x55FF55
+                color=0x55FF55,
             )
             await interaction.followup.send(embed=embed)
 
         except Exception as e:
             logger.error(f"VC接続エラー: {e}")
-            embed = discord.Embed(description="❌ ボイスチャンネルへの接続に失敗しました。", color=0xFF5555)
+            embed = discord.Embed(
+                description="❌ ボイスチャンネルへの接続に失敗しました。", color=0xFF5555
+            )
             await interaction.followup.send(embed=embed, ephemeral=True)
 
     @bot.tree.command(name="vc_leave", description="VCから退出")
