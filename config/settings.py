@@ -1,7 +1,9 @@
 """Configuration settings for Ollama Discord Bot."""
 
 import os
+from dotenv import load_dotenv 
 
+load_dotenv()
 
 class Config:
     """Bot configuration settings."""

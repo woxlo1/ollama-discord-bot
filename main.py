@@ -3,7 +3,6 @@
 import logging
 
 import discord
-from dotenv import load_dotenv
 
 from bot import OllamaBot
 from commands import setup_events, setup_slash_commands
@@ -11,9 +10,6 @@ from commands.advanced_commands import setup_advanced_commands
 from commands.voice_commands import setup_voice_commands
 from config import Config
 from utils import setup_logger
-
-# Load environment variables
-load_dotenv()
 
 # Validate configuration
 Config.validate()
